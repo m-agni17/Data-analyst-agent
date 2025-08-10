@@ -1,0 +1,41 @@
+# FastAPI and web server dependencies
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Data processing and analysis
+pandas
+numpy
+pyarrow
+openpyxl
+xlrd
+
+# Database connections
+duckdb
+sqlalchemy
+psycopg2-binary
+pymysql
+
+# Web scraping
+aiohttp
+beautifulsoup4
+lxml
+
+# Machine Learning and Statistics
+scipy
+scikit-learn
+
+# Visualization
+matplotlib
+seaborn
+
+# LLM Integration
+groq
+
+# Utilities
+python-dotenv
+pydantic
+typing-extensions
+
+# Optional: For better error handling and logging
+structlog
