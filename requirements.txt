@@ -10,20 +10,15 @@ pyarrow
 openpyxl
 xlrd
 
-# Database connections
+# S3 / DuckDB
 duckdb
-sqlalchemy
-psycopg2-binary
-pymysql
 
 # Web scraping
 aiohttp
 beautifulsoup4
-lxml
 
-# Machine Learning and Statistics
+# Machine Learning and Statistics (used for regression)
 scipy
-scikit-learn
 
 # Visualization
 matplotlib
@@ -34,8 +29,3 @@ groq
 
 # Utilities
 python-dotenv
-pydantic
-typing-extensions
-
-# Optional: For better error handling and logging
-structlog

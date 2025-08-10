@@ -34,10 +34,31 @@ app.add_middleware(
 
 # Initialize core components
 data_processor = DataProcessor()
-llm_client = LLMClient()
+# Lazily initialize LLM client to avoid import-time env var issues
+llm_client: Optional[LLMClient] = None
 web_scraper = WebScraper()
 question_parser = QuestionParser()
 viz_generator = VisualizationGenerator()
+
+
+def get_llm_client() -> LLMClient:
+    """Get or create the LLMClient instance lazily."""
+    global llm_client
+    if llm_client is None:
+        try:
+            llm_client = LLMClient()
+        except ValueError as e:
+            logger.error(str(e))
+            raise HTTPException(status_code=500, detail="Server LLM configuration missing")
+    return llm_client
+
+
+@app.on_event("startup")
+async def startup_check():
+    # Log presence (not value) of GROQ_API_KEY for easier ops debugging
+    if not os.getenv("GROQ_API_KEY"):
+        logger.warning("GROQ_API_KEY not set at startup; LLM features will fail until configured")
+
 
 @app.post("/api/")
 async def analyze_data(request: Request):
@@ -136,13 +157,13 @@ async def analyze_data(request: Request):
         if analysis_questions:
             try:
                 logger.info(f"Processing {len(analysis_questions)} analysis questions in batch")
-                analysis_responses = await llm_client.analyze_questions_batch(analysis_questions, all_data)
+                analysis_responses = await get_llm_client().analyze_questions_batch(analysis_questions, all_data)
             except Exception as e:
                 logger.error(f"Error in batch processing: {str(e)}")
                 # Fallback to individual processing
                 for question in analysis_questions:
                     try:
-                        response = await llm_client.analyze_question(question, all_data)
+                        response = await get_llm_client().analyze_question(question, all_data)
                         analysis_responses.append(response)
                     except Exception as individual_error:
                         logger.error(f"Error processing individual question: {str(individual_error)}")
@@ -212,7 +233,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=int(os.getenv("PORT", 8000)),
         reload=True,
         log_level="info"
     ) 
